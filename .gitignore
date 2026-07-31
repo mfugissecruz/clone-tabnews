@@ -1,2 +1,5 @@
 .next
 node_modules
+
+# env files — nunca versionar, exceto o .example
+.env

@@ -1,0 +1,14 @@
+title = "gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Chaves publicas por design, nao sao segredos"
+regexes = [
+  '''pk_(live|test)_[A-Za-z0-9]+''', # Stripe publishable key - documentado pela Stripe como seguro para expor no client
+]
+paths = [
+  '''\.next/prerender-manifest\.json''', # chaves de preview mode geradas pelo Next.js a cada build, nao sao segredos de usuario
+  '''\.next/.*\.nft\.json''', # node file trace - so hash de cache
+]

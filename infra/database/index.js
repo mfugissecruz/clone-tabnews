@@ -1,3 +1,4 @@
+import "server-only";
 import { Client } from "pg";
 
 async function query(queryObject) {
