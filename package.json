@@ -7,6 +7,8 @@
     "dev": "npm run services:up && npm run services:wait:database && npm run migration:up && next dev",
     "prebuild": "node scripts/check-public-env.mjs",
     "build": "next build",
+    "test": "npm run services:up && concurrently --names next,jest --hide next --kill-others --success command-jest \"next dev\" \"jest --runInBand --verbose\"",
+    "test:watch": "jest --watchAll --runInBand",
     "services:up": "docker compose -f infra/compose.yaml up -d",
     "services:down": "docker compose -f infra/compose.yaml down",
     "services:stop": "docker compose -f infra/compose.yaml stop",
@@ -16,8 +18,6 @@
     "lint:prettier:check": "prettier --check .",
     "lint:eslint:check": "next lint --dir .",
     "lint:prettier:fix": "prettier --write .",
-    "test": "npm run services:up && concurrently --names next,jest --hide next --kill-others --success command-jest \"next dev\" \"jest --runInBand --verbose\"",
-    "test:watch": "jest --watchAll --runInBand",
     "prepare": "husky",
     "commit": "cz"
   },
