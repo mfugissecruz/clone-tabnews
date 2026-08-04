@@ -8,6 +8,7 @@ describe("GET /api/v1/status", () => {
 
       beforeAll(async () => {
         await orchestrator.waitForAllServices();
+        await orchestrator.clearDatabase();
 
         response = await fetch("http://localhost:3000/api/v1/status");
         body = await response.clone().json();
