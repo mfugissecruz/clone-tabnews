@@ -1,5 +1,5 @@
 import migrationRunner from "node-pg-migrate";
-import { join } from "node:path";
+import { resolve } from "node:path";
 import database from "infra/database";
 import { env } from "env";
 
@@ -20,7 +20,7 @@ export default async function migrations(request, response) {
       dbClient: dbClient,
       databaseUrl: env.DATABASE_URL,
       dryRun: true,
-      dir: join("infra", "database", "migrations"),
+      dir: resolve("infra", "database", "migrations"),
       direction: "up",
       verbose: true,
       migrationsTable: "pgmigrations",
