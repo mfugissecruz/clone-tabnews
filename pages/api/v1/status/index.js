@@ -1,28 +1,30 @@
+import { createRouter } from "next-connect";
 import database from "infra/database";
-import { InternalServerError } from "infra/errors";
+import { InternalServerError, MethodNotAllowedError } from "infra/errors";
 
-async function status(request, response) {
-  try {
-    const updatedAt = new Date().toISOString();
-    const dependencies = await getDatabaseInfo();
+const router = createRouter();
 
-    response.status(200).json({
-      updated_at: updatedAt,
-      dependencies: {
-        database: {
-          max_connections: dependencies.max_connections,
-          opened_connections: dependencies.opened_connections,
-          version: dependencies.version,
-        },
+router.get(getHandler);
+
+export default router.handler({
+  onNoMatch: onNoMatchHandler,
+  onError: onErrorHandlerError,
+});
+
+async function getHandler(request, response) {
+  const updatedAt = new Date().toISOString();
+  const dependencies = await getDatabaseInfo();
+
+  response.status(200).json({
+    updated_at: updatedAt,
+    dependencies: {
+      database: {
+        max_connections: dependencies.max_connections,
+        opened_connections: dependencies.opened_connections,
+        version: dependencies.version,
       },
-    });
-  } catch (error) {
-    const publicErrorObject = new InternalServerError({ cause: error });
-
-    console.log("\nErro dentro do catch do database");
-    console.error(publicErrorObject);
-    response.status(500).json(publicErrorObject.toJson());
-  }
+    },
+  });
 }
 
 async function getDatabaseInfo() {
@@ -39,4 +41,21 @@ async function getDatabaseInfo() {
   return result.rows[0];
 }
 
-export default status;
+function onNoMatchHandler(request, response) {
+  const publicErrorObject = new MethodNotAllowedError();
+  return response
+    .status(publicErrorObject.statusCode)
+    .json(publicErrorObject.toJson());
+}
+
+function onErrorHandlerError(error, request, response) {
+  const publicErrorObject = new InternalServerError({
+    cause: error,
+  });
+
+  console.log("\nErro dentro do catch do next-connect:");
+  console.error(publicErrorObject);
+  response
+    .status(publicErrorObject.statusCode)
+    .json(publicErrorObject.toJson());
+}
