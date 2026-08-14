@@ -1,15 +1,11 @@
 import { createRouter } from "next-connect";
 import database from "infra/database";
-import { InternalServerError, MethodNotAllowedError } from "infra/errors";
+import controller from "infra/controllers";
 
 const router = createRouter();
-
 router.get(getHandler);
 
-export default router.handler({
-  onNoMatch: onNoMatchHandler,
-  onError: onErrorHandlerError,
-});
+export default router.handler(controller.errorHandlers);
 
 async function getHandler(request, response) {
   const updatedAt = new Date().toISOString();
@@ -39,23 +35,4 @@ async function getDatabaseInfo() {
   });
 
   return result.rows[0];
-}
-
-function onNoMatchHandler(request, response) {
-  const publicErrorObject = new MethodNotAllowedError();
-  return response
-    .status(publicErrorObject.statusCode)
-    .json(publicErrorObject.toJson());
-}
-
-function onErrorHandlerError(error, request, response) {
-  const publicErrorObject = new InternalServerError({
-    cause: error,
-  });
-
-  console.log("\nErro dentro do catch do next-connect:");
-  console.error(publicErrorObject);
-  response
-    .status(publicErrorObject.statusCode)
-    .json(publicErrorObject.toJson());
 }
