@@ -1,28 +1,26 @@
+import { createRouter } from "next-connect";
 import database from "infra/database";
-import { InternalServerError } from "infra/errors";
+import controller from "infra/controllers";
 
-async function status(request, response) {
-  try {
-    const updatedAt = new Date().toISOString();
-    const dependencies = await getDatabaseInfo();
+const router = createRouter();
+router.get(getHandler);
 
-    response.status(200).json({
-      updated_at: updatedAt,
-      dependencies: {
-        database: {
-          max_connections: dependencies.max_connections,
-          opened_connections: dependencies.opened_connections,
-          version: dependencies.version,
-        },
+export default router.handler(controller.errorHandlers);
+
+async function getHandler(request, response) {
+  const updatedAt = new Date().toISOString();
+  const dependencies = await getDatabaseInfo();
+
+  response.status(200).json({
+    updated_at: updatedAt,
+    dependencies: {
+      database: {
+        max_connections: dependencies.max_connections,
+        opened_connections: dependencies.opened_connections,
+        version: dependencies.version,
       },
-    });
-  } catch (error) {
-    const publicErrorObject = new InternalServerError({ cause: error });
-
-    console.log("\nErro dentro do catch do database");
-    console.error(publicErrorObject);
-    response.status(500).json(publicErrorObject.toJson());
-  }
+    },
+  });
 }
 
 async function getDatabaseInfo() {
@@ -38,5 +36,3 @@ async function getDatabaseInfo() {
 
   return result.rows[0];
 }
-
-export default status;
